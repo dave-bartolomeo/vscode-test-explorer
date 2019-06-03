@@ -2,10 +2,9 @@ import * as vscode from 'vscode';
 import { NodeState } from './state';
 import { TestCollection } from './testCollection';
 import { TestSuiteNode } from './testSuiteNode';
-import { TestSuiteInfo, TestInfo } from 'vscode-test-adapter-api';
+import { TestTreeNode } from 'vscode-test-adapter-api';
 
-export interface TreeNode {
-	readonly info: TestSuiteInfo | TestInfo;
+export interface TreeNode extends TestTreeNode {
 	readonly fileUri: string | undefined;
 	uniqueId: string;
 	readonly state: NodeState;

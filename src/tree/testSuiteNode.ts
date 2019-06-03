@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
-import { TestSuiteInfo } from 'vscode-test-adapter-api';
+import { TestSuiteInfo, TestContext } from 'vscode-test-adapter-api';
 import { TreeNode } from "./treeNode";
 import { NodeState, stateIcon, parentNodeState, parentCurrentNodeState, parentPreviousNodeState, parentAutorunFlag } from "./state";
 import { TestCollection } from './testCollection';
 import { TestNode } from './testNode';
 import { normalizeFilename } from '../util';
+import { createContextTags } from './contextTags';
 
 export class TestSuiteNode implements TreeNode {
 
@@ -14,6 +15,7 @@ export class TestSuiteNode implements TreeNode {
 	private tooltip?: string;
 
 	readonly fileUri: string | undefined;
+	private context: TestContext | undefined;
 	uniqueId: string;
 	get state(): NodeState { return this._state; }
 	readonly log = undefined;
@@ -148,7 +150,18 @@ export class TestSuiteNode implements TreeNode {
 		const treeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
 		treeItem.id = this.uniqueId;
 		treeItem.iconPath = this.collection.explorer.iconPaths[stateIcon(this.state)];
-		treeItem.contextValue = this.parent ? (this.fileUri ? 'suiteWithSource' : 'suite') : 'collection';
+		if (this.context) {
+			treeItem.contextValue = createContextTags(this.parent ? {
+				suite: true,
+				hasSource: this.fileUri ? true : false,
+				ext: this.context
+			} : {
+				collection: true,
+				ext: this.context
+			});
+		} else {
+			treeItem.contextValue = this.parent ? (this.fileUri ? 'suiteWithSource' : 'suite') : 'collection';
+		}
 		treeItem.description = this.description;
 		treeItem.tooltip = this.tooltip;
 

@@ -36,7 +36,7 @@
   "dependencies": {
     "escape-string-regexp": "^1.0.5",
     "tslib": "^1.9.3",
-    "vscode-test-adapter-api": "^1.7.0"
+    "vscode-test-adapter-api": "../vscode-test-adapter-api"
   },
   "devDependencies": {
     "@types/escape-string-regexp": "1.0.0",
@@ -400,12 +400,22 @@
         {
           "command": "test-explorer.debug",
           "group": "inline@1",
+          "when": "view == test-explorer && viewItem =~ /\\bdebuggable\\b/"
+        },
+        {
+          "command": "test-explorer.debug",
+          "group": "inline@1",
           "when": "view == test-explorer && viewItem == debuggableTestWithSource"
         },
         {
           "command": "test-explorer.debug",
           "group": "inline@1",
           "when": "view == test-explorer && viewItem == debuggableTest"
+        },
+        {
+          "command": "test-explorer.show-source",
+          "group": "inline@3",
+          "when": "view == test-explorer && viewItem =~ /\\bhasSource\\b/"
         },
         {
           "command": "test-explorer.show-source",
@@ -421,6 +431,11 @@
           "command": "test-explorer.show-source",
           "group": "inline@3",
           "when": "view == test-explorer && viewItem == testWithSource"
+        },
+        {
+          "command": "test-explorer.reload-collection",
+          "group": "1_reload",
+          "when": "view == test-explorer && viewItem =~ /\\bcollection\\b/"
         },
         {
           "command": "test-explorer.reload-collection",

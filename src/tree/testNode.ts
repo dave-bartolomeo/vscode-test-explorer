@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
-import { TestInfo, TestDecoration } from "vscode-test-adapter-api";
+import { TestInfo, TestDecoration, TestContext } from "vscode-test-adapter-api";
 import { TreeNode } from "./treeNode";
 import { NodeState, stateIcon, CurrentNodeState, defaultState } from "./state";
 import { TestSuiteNode } from './testSuiteNode';
 import { TestCollection } from './testCollection';
+import { createContextTags } from './contextTags';
 import { normalizeFilename } from '../util';
 
 export class TestNode implements TreeNode {
@@ -15,6 +16,8 @@ export class TestNode implements TreeNode {
 	private tooltip?: string;
 
 	readonly fileUri: string | undefined;
+	readonly context: TestContext | undefined;
+
 	uniqueId: string;
 	get state(): NodeState { return this._state; }
 	get log(): string { return this._log; }
@@ -36,6 +39,7 @@ export class TestNode implements TreeNode {
 
 		this.description = info.description;
 		this.tooltip = info.tooltip;
+		this.context = info.context;
 
 		const oldNode = oldNodesById ? oldNodesById.get(info.id) : undefined;
 		if (oldNode && (oldNode.info.type === 'test')) {
@@ -173,9 +177,20 @@ export class TestNode implements TreeNode {
 		const treeItem = new vscode.TreeItem(this.info.label, vscode.TreeItemCollapsibleState.None);
 		treeItem.id = this.uniqueId;
 		treeItem.iconPath = this.collection.explorer.iconPaths[stateIcon(this.state)];
-		treeItem.contextValue = this.collection.adapter.debug ? 
-			(this.fileUri ? 'debuggableTestWithSource' : 'debuggableTest') :
-			(this.fileUri ? 'testWithSource' : 'test');
+
+		if (this.context) {
+			treeItem.contextValue = createContextTags({
+				debuggable: this.collection.adapter.debug !== undefined,
+				test: true,
+				hasSource: this.fileUri ? true : false,
+				ext: this.context
+			});
+		}
+		else {
+			treeItem.contextValue = this.collection.adapter.debug ? 
+				(this.fileUri ? 'debuggableTestWithSource' : 'debuggableTest') :
+				(this.fileUri ? 'testWithSource' : 'test');
+		}
 		treeItem.command = {
 			title: '',
 			command: 'test-explorer.show-error',
